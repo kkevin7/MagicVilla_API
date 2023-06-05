@@ -2,6 +2,7 @@
 using MagicVilla_API.Models;
 using MagicVilla_API.Models.Dto;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -107,6 +108,28 @@ namespace MagicVilla_API.Controllers
             villa.Nombre = villaDto.Nombre;
             villa.Ocupantes = villaDto.Ocupantes;
             villa.MetrosCuadrados = villaDto.MetrosCuadrados;
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult PatchVilla(int id, JsonPatchDocument<VillaDto> patchDto)
+        {
+            if (patchDto == null || id == 0)
+            {
+                return BadRequest();
+            }
+            var villa = VillaStore.villaList.FirstOrDefault(v => v.Id == id);
+            patchDto.ApplyTo(villa, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             return NoContent();
         }
