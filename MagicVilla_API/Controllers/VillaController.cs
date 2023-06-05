@@ -3,6 +3,7 @@ using MagicVilla_API.Models;
 using MagicVilla_API.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MagicVilla_API.Controllers
 {
@@ -43,6 +44,17 @@ namespace MagicVilla_API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<VillaDto> CrearVilla([FromBody] VillaDto villaDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (VillaStore.villaList.FirstOrDefault(v => v.Nombre.ToLower() == villaDto.Nombre.ToLower()) != null)
+            {
+                ModelState.AddModelError("NombreExiste", "La villa con ese Nombre ya existe!");
+                return BadRequest(ModelState);
+            }
+
             if(villaDto == null)
             {
                 return BadRequest(villaDto);
